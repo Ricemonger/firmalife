@@ -11,8 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface IBee extends INBTSerializable<CompoundTag>
-{
+public interface IBee extends INBTSerializable<CompoundTag> {
     int MAX_DISEASE = 5;
     int MAX_INFECTION = 5;
 
@@ -30,8 +29,7 @@ public interface IBee extends INBTSerializable<CompoundTag>
 
     int getGeneticDisease();
 
-    default boolean hasGeneticDisease()
-    {
+    default boolean hasGeneticDisease() {
         return getGeneticDisease() != -1;
     }
 
@@ -39,92 +37,87 @@ public interface IBee extends INBTSerializable<CompoundTag>
 
     int getParasiticInfection();
 
-    default boolean hasParasiticInfection()
-    {
+    default boolean hasParasiticInfection() {
         return getParasiticInfection() != -1;
     }
 
-    default int getAbility(BeeAbility ability)
-    {
+    default int getAbility(BeeAbility ability) {
         return getAbilityMap()[ability.ordinal()];
     }
 
     /**
      * Init two, perhaps three abilities chosen randomly
      */
-    default void initFreshAbilities(RandomSource random)
-    {
+    default void initFreshAbilities(RandomSource random) {
         final int[] values = BeeAbility.fresh();
 
         values[random.nextInt(values.length)] = random.nextInt(3) + 1;
         values[random.nextInt(values.length)] = random.nextInt(3) + 1;
-        if (random.nextFloat() < 0.1f)
-        {
+        if (random.nextFloat() < 0.1f) {
             values[random.nextInt(values.length)] = random.nextInt(3) + 1;
         }
         setAbilities(values);
         setHasQueen(true);
     }
 
-    default void setAbilitiesFromParents(IBee parent1, IBee parent2, RandomSource random)
-    {
+    default void setAbilitiesFromParents(IBee parent1, IBee parent2, RandomSource random) {
         int[] parent1Abilities = parent1.getAbilityMap();
         int[] parent2Abilities = parent2.getAbilityMap();
         int mutation = (parent1Abilities[BeeAbility.MUTANT.ordinal()] + parent2Abilities[BeeAbility.MUTANT.ordinal()]) / 2;
-        mutation = Mth.clamp(mutation, 1, 5);
+        int abilityMutation = mutation / 2;
 
-        int abilitiesSet = 0;
+        boolean newAbilityAdded = false;
         List<BeeAbility> abilities = Arrays.asList(BeeAbility.VALUES);
         Collections.shuffle(abilities);
-        for (BeeAbility ability : abilities)
-        {
+        for (BeeAbility ability : abilities) {
             int average = (parent1Abilities[ability.ordinal()] + parent2Abilities[ability.ordinal()]) / 2;
-            if (average >= 1 && abilitiesSet < 4)
-            {
-                abilitiesSet++;
-                setAbility(ability, Mth.nextInt(random, average - mutation, average + mutation));
+            if (average >= 1) {
+
+                int abilityLevel = Mth.nextInt(random, average - 5 - abilityMutation, average + abilityMutation + 2);
+
+                if (abilityLevel >= 1) {
+                    setAbility(ability, Math.min(10, abilityLevel));
+                }
+
+            } else if (average == 0 && mutation >= 7 && !newAbilityAdded) {
+
+                int abilityLevel = Mth.nextInt(random, -25, Math.min(1, abilityMutation - 10 + mutation));
+
+                if (abilityLevel >= 1) {
+                    setAbility(ability, Math.min(10, abilityLevel));
+                    newAbilityAdded = true;
+                }
+
             }
         }
         setHasQueen(true);
-        if (parent1.hasGeneticDisease())
-        {
+        if (parent1.hasGeneticDisease()) {
             setGeneticDisease(parent1.getGeneticDisease());
-        }
-        else
-        {
+        } else {
             setGeneticDisease(parent2.getGeneticDisease());
         }
-        if (mutation >= 4 && random.nextInt(5) == 0)
-        {
+        if (mutation >= 4 && random.nextInt(36 - (int) (Math.pow(mutation, 1.5))) == 0) {
             setGeneticDisease(Mth.nextInt(random, 0, MAX_DISEASE));
         }
     }
 
-    default void addTooltipInfo(List<Component> tooltip)
-    {
-        if (hasQueen())
-        {
+    default void addTooltipInfo(List<Component> tooltip) {
+        if (hasQueen()) {
             tooltip.add(Component.translatable("firmalife.bee.queen").withStyle(ChatFormatting.GOLD));
-            if (getGeneticDisease() != -1)
-            {
+            if (getGeneticDisease() != -1) {
                 tooltip.add(Component.translatable("firmalife.bee.genetic_disease", Component.translatable("firmalife.bee.disease" + getGeneticDisease())).withStyle(ChatFormatting.RED));
             }
-            if (getParasiticInfection() != -1)
-            {
+            if (getParasiticInfection() != -1) {
                 tooltip.add(Component.translatable("firmalife.bee.parasitic_infection", Component.translatable("firmalife.bee.infection" + getGeneticDisease())).withStyle(ChatFormatting.RED));
             }
             tooltip.add(Component.translatable("firmalife.bee.abilities").withStyle(ChatFormatting.WHITE));
-            for (BeeAbility ability : BeeAbility.VALUES)
-            {
+            for (BeeAbility ability : BeeAbility.VALUES) {
                 final int amount = getAbility(ability);
-                if (amount > 0)
-                {
+                if (amount > 0) {
                     tooltip.add(Component.translatable("firmalife.bee.ability." + ability.getSerializedName(), String.valueOf(amount)).withStyle(ChatFormatting.GRAY));
                 }
             }
-        }
-        else
-        {
+        } else {
             tooltip.add(Component.translatable("firmalife.bee.no_queen").withStyle(ChatFormatting.RED));
         }
     }
