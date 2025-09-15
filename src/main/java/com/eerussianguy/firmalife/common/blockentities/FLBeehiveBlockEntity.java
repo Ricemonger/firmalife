@@ -1,9 +1,12 @@
 package com.eerussianguy.firmalife.common.blockentities;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.eerussianguy.firmalife.common.blocks.FLBlocks;
 import com.eerussianguy.firmalife.common.blocks.greenhouse.LargePlanterBlock;
 import com.eerussianguy.firmalife.common.entities.FLBee;
 import com.eerussianguy.firmalife.common.entities.FLEntities;
@@ -308,32 +311,35 @@ public class FLBeehiveBlockEntity extends TickableInventoryBlockEntity<ItemStack
     }
 
     @SuppressWarnings("deprecation")
-    public int getFlowers(List<IBee> bees, boolean tick)
-    {
+    public int getFlowers(List<IBee> bees, boolean tick) {
         assert level != null;
         int flowers = 0;
         final BlockPos min = worldPosition.offset(-5, -5, -5);
         final BlockPos max = worldPosition.offset(5, 5, 5);
         final boolean empty = bees.isEmpty();
-        if (level.hasChunksAt(min, max))
-        {
-            for (BlockPos pos : BlockPos.betweenClosed(min, max))
-            {
+        if (level.hasChunksAt(min, max)) {
+            final BlockPos minBeehive = worldPosition.offset(-10, -10, -10);
+            final BlockPos maxBeehive = worldPosition.offset(10, 10, 10);
+            int beehivesCounter = 0;
+            for (BlockPos pos : BlockPos.betweenClosed(minBeehive, maxBeehive)) {
                 final BlockState state = level.getBlockState(pos);
-                if (isFlower(state))
-                {
+                if (Helpers.isBlock(state, FLBlocks.BEEHIVE.get())) {
+                    beehivesCounter++;
+                    if (beehivesCounter > 1) {
+                        return 0;
+                    }
+                }
+            }
+            for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+                final BlockState state = level.getBlockState(pos);
+                if (isFlower(state)) {
                     flowers += 1;
                 }
-                if (tick)
-                {
-                    if (empty)
-                    {
+                if (tick) {
+                    if (empty) {
                         tickPosition(pos, state, null);
-                    }
-                    else
-                    {
-                        for (IBee bee : bees)
-                        {
+                    } else {
+                        for (IBee bee : bees) {
                             tickPosition(pos, state, bee);
                         }
                     }
@@ -343,6 +349,7 @@ public class FLBeehiveBlockEntity extends TickableInventoryBlockEntity<ItemStack
         return flowers;
     }
 
+
     private boolean isFlower(BlockState state)
     {
         return Helpers.isBlock(state, BlockTags.FLOWERS) || (state.getBlock() instanceof PlantBlock && !(state.getBlock() instanceof ShortGrassBlock)) || (state.getBlock() instanceof LargePlanterBlock && state.getValue(LargePlanterBlock.WATERED));
@@ -350,39 +357,60 @@ public class FLBeehiveBlockEntity extends TickableInventoryBlockEntity<ItemStack
 
     public int getHoneyTickChanceInverted(List<IBee> bees, int flowers)
     {
-        int chance = 30;
+        if(bees.isEmpty())
+        {
+            return Integer.MAX_VALUE;
+        }
+
+        flowers = Math.min(flowers, 60);
+
+        int chance = 200 - ((flowers - 10) * 2);
         for (IBee bee : bees)
         {
             if (bee.hasQueen())
             {
-                chance += 10 - bee.getAbility(BeeAbility.PRODUCTION);
+                chance -= (8 + (1.5f * bee.getAbility(BeeAbility.PRODUCTION)));
             }
         }
-        if (!bees.isEmpty())
-        {
-            chance /= bees.size();
-        }
-        return Math.max(0, chance - Mth.ceil((0.2 * Math.min(flowers, 60))));
+
+        chance /= bees.size();
+
+        return Math.max(0, chance);
     }
 
     public int getBreedTickChanceInverted(List<IBee> bees, int flowers)
     {
-        int chance = 0;
+        flowers = Math.min(flowers, 60);
+
+        int chance = 71 - flowers;
+
+        List<Integer> fertilises = new ArrayList<>();
+
         for (IBee bee : bees)
         {
             if (bee.hasQueen())
             {
-                chance += 10 - bee.getAbility(BeeAbility.FERTILITY);
+                fertilises.add(bee.getAbility(BeeAbility.FERTILITY));
             }
         }
-        // no bees, have to give some chance
-        if (bees.isEmpty())
-        {
-            chance = 80;
+
+        fertilises.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o2-o1;
+            }
+        });
+
+        if(!fertilises.isEmpty()) {
+            chance -= fertilises.get(0) * 0.5;
         }
-        // flowers increase probability
-        return Math.max(0, chance - Math.min(flowers, 60));
+        if(fertilises.size() >= 2) {
+            chance -= fertilises.get(1) * 0.5;
+        }
+
+        return Math.max(0, chance);
     }
+
 
     public void addHoney(int amount)
     {
