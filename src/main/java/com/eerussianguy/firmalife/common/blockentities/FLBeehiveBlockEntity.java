@@ -266,7 +266,7 @@ public class FLBeehiveBlockEntity extends TickableInventoryBlockEntity<ItemStack
         if (flowers > MIN_FLOWERS && (honeyChanceInverted == 0 || level.random.nextInt(honeyChanceInverted) == 0))
         {
             usableBees.removeIf(IBee::hasGeneticDisease);
-            addHoney(usableBees.size());
+            addHoney(1);
         }
 
     }
