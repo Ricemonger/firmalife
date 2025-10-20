@@ -139,6 +139,7 @@ public class StovetopPotBlockEntity extends BoilingBlockEntity<StovetopPotBlockE
     {
         int ingredientCount = 0;
         float water = 20, saturation = 2;
+        int hunger = 0;
         float[] nutrition = new float[Nutrient.TOTAL];
         ItemStack soupStack = ItemStack.EMPTY;
         for (int i = 0; i < SLOTS; i++)
@@ -153,6 +154,7 @@ public class StovetopPotBlockEntity extends BoilingBlockEntity<StovetopPotBlockE
                     break;
                 }
                 final FoodData data = food.getData();
+                hunger += data.hunger();
                 water += data.water();
                 saturation += data.saturation();
                 for (Nutrient nutrient : Nutrient.VALUES)
@@ -164,8 +166,8 @@ public class StovetopPotBlockEntity extends BoilingBlockEntity<StovetopPotBlockE
         }
         if (ingredientCount > 0)
         {
-            float multiplier = 1 - (0.05f * ingredientCount); // per-serving multiplier of nutrition
-            water *= multiplier; saturation *= multiplier;
+            float multiplier = 0.7f; // per-serving multiplier of nutrition
+            water *= multiplier; saturation *= 0.5f;
             Nutrient maxNutrient = Nutrient.GRAIN; // determines what item you get. this is a default
             float maxNutrientValue = 0;
             for (Nutrient nutrient : Nutrient.VALUES)
@@ -178,8 +180,9 @@ public class StovetopPotBlockEntity extends BoilingBlockEntity<StovetopPotBlockE
                     maxNutrient = nutrient;
                 }
             }
-            FoodData data = FoodData.create(SoupPotRecipe.SOUP_HUNGER_VALUE, water, saturation, nutrition, SoupPotRecipe.SOUP_DECAY_MODIFIER);
-            int servings = (int) (ingredientCount / 2f) + 1;
+            int servings = 2;
+            FoodData data = FoodData.create(hunger/servings, water, saturation, nutrition, SoupPotRecipe.SOUP_DECAY_MODIFIER);
+
             long created = FoodCapability.getRoundedCreationDate();
 
             soupStack = new ItemStack(TFCItems.SOUPS.get(maxNutrient).get(), servings);
