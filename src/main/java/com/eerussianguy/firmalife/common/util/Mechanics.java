@@ -174,7 +174,7 @@ public final class Mechanics
     public static final Supplier<Float> GROWTH_FACTOR = () -> 1f / (FLConfig.SERVER.greenhouseGrowthDays.get().floatValue() * ICalendar.TICKS_IN_DAY); // same as tfc
     public static final Supplier<Float> NUTRIENT_CONSUMPTION = () -> 1f / (FLConfig.SERVER.greenhouseNutrientDays.get().floatValue() * ICalendar.TICKS_IN_DAY); //  12 -> 8 days
     public static final Supplier<Float> WATER_CONSUMPTION = () -> 1f / (FLConfig.SERVER.greenhouseWaterDays.get().floatValue() * ICalendar.TICKS_IN_DAY); // 12 days
-    public static final float NUTRIENT_GROWTH_FACTOR = 0.1f;
+    public static final float NUTRIENT_GROWTH_FACTOR = 0.3f;
 
     public static boolean growthTick(Level level, BlockPos pos, BlockState state, LargePlanterBlockEntity planter)
     {
