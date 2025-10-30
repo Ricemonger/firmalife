@@ -98,7 +98,7 @@ public class GrapePlantBlockEntity extends TickableBlockEntity implements ICalen
             }
             else if (month == Month.JULY && level.random.nextFloat() > 0.75f)
             {
-                lifecycle = Lifecycle.FLOWERING;
+                lifecycle = Lifecycle.FRUITING;
             }
         }
         lifecycleAt(worldPosition, lifecycle);
