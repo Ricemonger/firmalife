@@ -1,5 +1,6 @@
 package com.eerussianguy.firmalife.common.items;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.nbt.CompoundTag;
@@ -37,7 +38,11 @@ public class BeehiveFrameItem extends Item
                 if (bee.hasQueen())
                 {
                     slot.set(new ItemStack(this));
-                    ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(FLItems.BEESWAX.get()));
+                    int chance = Math.min(10, Arrays.stream(bee.getAbilityMap()).sum()/2);
+                    if(player.level().random.nextInt(100) < chance)
+                    {
+                        ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(FLItems.BEESWAX.get()));
+                    }
                     other.hurtAndBreak(1, player, p -> {});
                     return true;
                 }
