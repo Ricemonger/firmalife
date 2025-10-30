@@ -38,7 +38,7 @@ public class BeehiveFrameItem extends Item
                 if (bee.hasQueen())
                 {
                     slot.set(new ItemStack(this));
-                    int chance = Math.min(10, Arrays.stream(bee.getAbilityMap()).sum()/2);
+                    int chance = Math.max(10, Arrays.stream(bee.getAbilityMap()).sum()/2);
                     if(player.level().random.nextInt(100) < chance)
                     {
                         ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(FLItems.BEESWAX.get()));
