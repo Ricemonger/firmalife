@@ -164,7 +164,7 @@ public class SprinklerBlockEntity extends TFCBlockEntity implements FluidTankCal
         return state.getBlock() instanceof SprinklerPipeBlock ? state.getValue(DirectionPropertyBlock.getProperty(direction)) : state.getValue(GreenhousePortBlock.AXIS) == direction.getAxis();
     }
 
-    private static final int MAX_COST = 32;
+    private static final int MAX_COST = 64;
 
     private boolean valid = false;
 
