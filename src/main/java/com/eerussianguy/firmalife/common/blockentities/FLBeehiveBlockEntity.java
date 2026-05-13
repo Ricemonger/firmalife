@@ -408,7 +408,7 @@ public class FLBeehiveBlockEntity extends TickableInventoryBlockEntity<ItemStack
                 if (cropAffinity >= 1 && level.random.nextInt(25) == 0) {
                     final int which = level.random.nextInt(3); // 0, 1, 2
                     final float nut = level.random.nextFloat() * cropAffinity * 0.01f;
-                    final float cap = cropAffinity * 0.2f; // max that can possibly be set by bee fertilization, 0 -> 5 scale
+                    final float cap = cropAffinity * 0.1f; // max that can possibly be set by bee fertilization, 0 -> 5 scale
                     receiveNutrients(farmland, cap, which == 0 ? nut : 0, which == 1 ? nut : 0, which == 2 ? nut : 0);
                 }
             }

@@ -4,7 +4,7 @@ license="MIT"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
 modId="firmalife" #mandatory
-version="${file.jarVersion}" #mandatory
+version="2.1.23" #mandatory
 displayName="Firmalife" #mandatory
 logoFile="firmalife.png" #optional
 authors="EERussianguy, Indi, Peffern, Lumintorious" #optional
